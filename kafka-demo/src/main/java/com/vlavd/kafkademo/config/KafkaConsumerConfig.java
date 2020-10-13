@@ -1,6 +1,8 @@
 package com.vlavd.kafkademo.config;
 
 import com.vlavd.kafkademo.model.User;
+import com.vlavd.kafkademo.util.AvroGenericRecordDeserializer;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.LongDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,21 +31,21 @@ public class KafkaConsumerConfig {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, AvroGenericRecordDeserializer.class);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaGroupId);
         return props;
     }
 
     @Bean
     public KafkaListenerContainerFactory<?> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<Long, User> factory =
+        ConcurrentKafkaListenerContainerFactory<Long, GenericRecord> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         return factory;
     }
 
     @Bean
-    public ConsumerFactory<Long, User> consumerFactory() {
-        return new DefaultKafkaConsumerFactory<>(consumerConfigs(), new LongDeserializer(), new JsonDeserializer<>(User.class));
+    public ConsumerFactory<Long, GenericRecord> consumerFactory() {
+        return new DefaultKafkaConsumerFactory<>(consumerConfigs());
     }
 }

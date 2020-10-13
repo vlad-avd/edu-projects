@@ -1,6 +1,8 @@
 package com.vlavd.kafkademo.config;
 
 import com.vlavd.kafkademo.model.User;
+import com.vlavd.kafkademo.util.AvroGenericRecordSerializer;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.LongSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,17 +30,17 @@ public class KafkaProducerConfig {
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
                 LongSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-                JsonSerializer.class);
+                AvroGenericRecordSerializer.class);
         return props;
     }
 
     @Bean
-    public ProducerFactory<Long, User> producerFactory() {
+    public ProducerFactory<Long, GenericRecord> producerFactory() {
         return new DefaultKafkaProducerFactory<>(producerConfigs());
     }
 
     @Bean
-    public KafkaTemplate<Long, User> kafkaTemplate() {
+    public KafkaTemplate<Long, GenericRecord> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 }
